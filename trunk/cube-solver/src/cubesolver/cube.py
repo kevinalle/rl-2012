@@ -21,7 +21,7 @@ def decode(gameid):
   w, h = map(int, gameid[1:].split(":")[0].split("x"))
   boardid, pos = gameid.split(":")[1].split(",")
   # construir una lista a partir de la representacin binaria del tablero inicial
-  board = [["_", "#"][b=="1"] for b in (bin(int(boardid, w*h))[2:]).zfill(w*h)]
+  board = [["_", "#"][b=="1"] for b in (bin(int(boardid, 16))[2:]).zfill(w*h)]
   board[int(pos)] = "C"
   board_str = '\n'.join([''.join(board[i*w:i*w+w]) for i in range(h)])
   return {"w": w, "h": h, "board": board_str, "pos": pos}
