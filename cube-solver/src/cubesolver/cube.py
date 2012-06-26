@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import commands, os, sys, time, random, re
+import commands, os, sys, time, random, re, argparse
 
 def move(where):
   """Espera .1s y apreta la tecla "where" (en la ventana activa)"""
@@ -21,15 +21,15 @@ def decode(gameid):
   w, h = map(int, gameid[1:].split(":")[0].split("x"))
   boardid, pos = gameid.split(":")[1].split(",")
   # construir una lista a partir de la representacin binaria del tablero inicial
-  board = [["_", "#"][b=="1"] for b in (bin(int(boardid, 16))[2:]).zfill(w*h)]
+  board = [["_", "#"][b=="1"] for b in (bin(int(boardid, 16))[2:]).zfill(4*len(boardid))][:w*h]
   board[int(pos)] = "C"
   board_str = '\n'.join([''.join(board[i*w:i*w+w]) for i in range(h)])
   return {"w": w, "h": h, "board": board_str, "pos": pos}
 
-def main(game_id=None):
+def main(game_id=None, solver=None, size=(4,4)):
   # correr el cube con --generate, que nos genera un identificador de una
   # instancia del juego (del tipo "c4x4:62A4,11").
-  gameid = game_id or commands.getoutput("cube --generate 1 c4x4")
+  gameid = game_id or commands.getoutput("cube --generate 1 c%dx%d"%tuple(size))
   print gameid
   # parsear el id del juego y extraer el tablero inicial y posicion del cubo.
   game = decode(gameid)
@@ -40,20 +40,34 @@ def main(game_id=None):
     # mismo juego que generamos y decodificamos antes.
     os.system("cube %s &"%gameid)
     # (darle 2s para que se abra)
-    time.sleep(2)
+    wait2sFromNow = time.time()
+
+  if solver:
+    output = commands.getoutput("%s %s"%(solver,gameid))
+    actions = output.strip().split("\n")
+  else:
+    moves = ["Up", "Right", "Down", "Left"]
+    actions = [random.choice(moves) for _ in xrange(20)]
+
   # encontrar el Window ID de la ventana que abrio.
   windowid = commands.getoutput('xwininfo -name "Cube" | grep "Window id" | cut -d\  -f4')
   # activar esa ventana para poder mandarle teclas
   os.system("xdotool windowactivate %s"%windowid)
   
-  # mover randomly :P
-  moves = ["Up", "Right", "Down", "Left"]
-  for i in xrange(50):
-    move(random.choice(moves))
+  if not game_id:
+    # (darle 2s para que se abra)
+    tardo = time.time()-wait2sFromNow
+    if solver: print "solver took %ss"%tardo
+    if tardo < 2: time.sleep(2-tardo)
+
+  for a in actions:
+    move(a)
 
 if __name__ == "__main__":
-  if len(sys.argv) > 1:
-    main(sys.argv[1])
-  else:
-    main()
+  parser = argparse.ArgumentParser(description='Solve "Cube".')
+  parser.add_argument('--solver', default="./astar.py", help='executable that solves the algorithm')
+  parser.add_argument('--game', default=None, help='Game ID')
+  parser.add_argument('--size', nargs=2, type=int, default=(4,4), help='Board size')
+  args = parser.parse_args()
 
+  main(game_id=args.game, solver=args.solver, size=args.size)
