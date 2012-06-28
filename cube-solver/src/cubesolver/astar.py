@@ -69,13 +69,13 @@ def rot_W(cube):
 def rot_E(cube):
   return [cube[N], cube[S], cube[B], cube[T], cube[E], cube[W]]
 
-# Llama a la rotacion correspondiente segun el int to
 def rot(cube, to):
+  """Llama a la rotacion correspondiente segun el int to"""
   return [rot_N, rot_S, rot_W, rot_E][to](cube)
 
-# Un estado es WIN si el cubo esta todo pintado, osea si el estado del cubo es
-# [True, True, True, True, True, True], osea si su representacion en int es 63
 def iswinp(pstate):
+  """Un estado es WIN si el cubo esta todo pintado, osea si el estado del cubo
+  es [True,True,True,True,True,True], osea su representacion en int es 63"""
   return pstate[2] == 63
 
 def draw(state, w, h):
@@ -84,26 +84,31 @@ def draw(state, w, h):
   board_str = '\n'.join([''.join(board[i*w:i*w+w]) for i in range(h)])
   print board_str
 
-# Devuelve las acciones que puede tomar desde el estado actual
 def can(state, w, h):
+  """Devuelve las acciones que puede tomar desde el estado actual"""
   return [i for (i,c) in enumerate([state["y"]>0, state["y"]<h-1, state["x"]>0, state["x"]<w-1]) if c]
 
-# Devuelve el estado resultante de tomar la accion to desde state
 def go(state, to, w):
+  """Devuelve el estado resultante de tomar la accion to desde state"""
   board, cube = state["board"][:], rot(state["cube"], to)
   x, y = [lambda x,y: (x,y-1), lambda x,y: (x,y+1), lambda x,y: (x-1,y), lambda x,y: (x+1,y)][to](state["x"], state["y"])
   board[y*w+x], cube[B] = cube[B], board[y*w+x]
   return {"x": x, "y": y, "board": board, "cube": cube}
 
-# Devuelve los estados vecinos del estado actual (empacados)
 def vecinos(pstate, w, h):
+  """Devuelve los estados vecinos del estado actual (empacados)"""
   state = unpack_state(pstate, w, h)
   return [(to, pack_state(go(state, to, w), w)) for to in can(state, w, h)]
 
 def solve(pstate, w, h):
+  """Busca camino minimo en el grafo de estados con A*, copiado casi textual del
+  pseudocodigo de http://en.wikipedia.org/wiki/A*_search_algorithm"""
+
   def heuristic(pstate):
-    # Heuristica bastante "suelta". Cantidad de caras que faltan levantar
+    # Heuristica bastante relajada. Cantidad de caras que faltan levantar
+    # (claramente necesita al menos esa cantidad de pasos para ganar)
     return 6 - bin(pstate[2]).count("1")
+
   g = {pstate: 0}
   f = {pstate: heuristic(pstate)}
   # heap de los nodos a explorar
@@ -112,6 +117,7 @@ def solve(pstate, w, h):
   visitados = set()
   came_from = {}
   # Reconstruccion recursiva del camino despues de llegar al goal
+
   def reconstruct(pstate):
     if pstate in came_from:
       parent, action = came_from[pstate]
@@ -119,6 +125,7 @@ def solve(pstate, w, h):
       return path + [action]
     else:
       return []
+
   # sacar de a uno de la frontera, actualizar valor, agregar los vecinos
   while frontera:
     fval, ps = heapq.heappop(frontera)
@@ -150,7 +157,6 @@ def main(gameid):
     #~print state["cube"]
     #~print state["board"]
     #~print
-
 
 if __name__ == "__main__":
   if len(sys.argv) > 1:
