@@ -21,8 +21,14 @@ def decode(gameid):
   w, h = map(int, gameid[1:].split(":")[0].split("x"))
   boardid, pos = gameid.split(":")[1].split(",")
   # construir una lista a partir de la representacin binaria del tablero inicial
-  board = [["_", "#"][b=="1"] for b in (bin(int(boardid, 16))[2:]).zfill(4*len(boardid))][:w*h]
+  # (pasar el hexadecimal a binario, sacarle el "0b" del principio, volver a
+  # agregarle los 0s de la izquierda que corresponden, y truncarlo al tamanio
+  # del tablero (si no tenia multiplo de 4 celdas))
+  boardbool = (bin(int(boardid, 16))[2:]).zfill(4*len(boardid))[:w*h]
+  # representacion en ASCII del tablero: _ celda blanca, # celda azul, C cubo
+  board = [{"0":"_", "1": "#"}[b] for b in boardbool]
   board[int(pos)] = "C"
+  # agregar "\n" cada w celdas
   board_str = '\n'.join([''.join(board[i*w:i*w+w]) for i in range(h)])
   return {"w": w, "h": h, "board": board_str, "pos": pos}
 
@@ -61,7 +67,10 @@ def main(game_id=None, solver=None, size=(4,4)):
     if tardo < 2: time.sleep(2-tardo)
 
   for a in actions:
-    move(a)
+    if a in ["Up", "Right", "Down", "Left"]:
+      move(a)
+    else:
+      raise Exception, "Accion invalida"
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description='Solve "Cube".')
