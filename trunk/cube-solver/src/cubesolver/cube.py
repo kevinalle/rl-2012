@@ -2,7 +2,7 @@
 """Correr el cube y mandarle acciones"""
 
 import commands, os, time, random, argparse
-from util import decode, draw
+from state import State
 
 def move(where):
     """Espera .1s y apreta la tecla "where" (en la ventana activa)"""
@@ -18,8 +18,8 @@ def main(game_id=None, solver=None, size=(4, 4)):
                             "cube --generate 1 c%dx%d" % tuple(size))
     print gameid
     # parsear el id del juego y extraer el tablero inicial y posicion del cubo.
-    game = decode(gameid)
-    draw(*game)
+    game = State(gameid=gameid)
+    game.draw()
 
     if not game_id:
         # correr el cube con la instancia que generamos antes (abre una ventana

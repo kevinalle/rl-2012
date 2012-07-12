@@ -2,9 +2,9 @@
 """Solve Cube with A*"""
 
 import sys, heapq
-from util import iswinp, vecinos, decode, pack_state, MOVS
+from state import State, MOVS
 
-def solve(pstate, width, height):
+def solve(state):
     """Busca camino minimo en el grafo de estados con A*, copiado casi textual
     del pseudocodigo de http://en.wikipedia.org/wiki/A*_search_algorithm"""
 
@@ -13,6 +13,7 @@ def solve(pstate, width, height):
         (claramente necesita al menos esa cantidad de pasos para ganar)"""
         return 6 - bin(pstate[2]).count("1")
 
+    pstate = state.pack()
     g_score = {pstate: 0}
     f_score = {pstate: heuristic(pstate)}
     # heap de los nodos a explorar
@@ -32,16 +33,17 @@ def solve(pstate, width, height):
 
     # sacar de a uno de la frontera, actualizar valor, agregar los vecinos
     while frontera:
-        _, state = heapq.heappop(frontera)
-        if iswinp(state):
-            return reconstruct(state)
-        visitados.add(state)
-        for action, vecino in vecinos(state, width, height):
+        _, packed = heapq.heappop(frontera)
+        state = State(packed=packed)
+        if state.iswin():
+            return reconstruct(packed)
+        visitados.add(packed)
+        for action, vecino in state.vecinos():
             if vecino in visitados:
                 continue
-            tentative_g = g_score[state] + 1
+            tentative_g = g_score[packed] + 1
             if vecino not in frontera or tentative_g < g_score[vecino]:
-                came_from[vecino] = (state, action)
+                came_from[vecino] = (packed, action)
                 g_score[vecino] = tentative_g
                 f_score[vecino] = tentative_g + heuristic(vecino)
                 heapq.heappush(frontera, (f_score[vecino], vecino))
@@ -49,9 +51,8 @@ def solve(pstate, width, height):
 
 def main(gameid):
     """Decode GameID, find solution, print solution"""
-    state, width, height = decode(gameid)
-    pstate = pack_state(state, width)
-    solution = solve(pstate, width, height)
+    state = State(gameid=gameid)
+    solution = solve(state)
     print '\n'.join([MOVS[a] for a in solution])
 
     # Para debug, imprimo los pasos y acciones
