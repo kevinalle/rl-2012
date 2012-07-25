@@ -53,7 +53,8 @@ def main(game_id=None, solver=None, size=(4, 4)):
         if action in ["Up", "Right", "Down", "Left"]:
             move(action)
         else:
-            raise Exception, "Accion invalida"
+            # raise Exception, "Accion invalida: %s"%action
+            print action
 
 def parseargs():
     """Parse command line arguments and run main"""
