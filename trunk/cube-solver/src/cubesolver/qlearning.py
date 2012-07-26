@@ -58,8 +58,8 @@ def qlearning(inicial):
             s = s_next
             steps += 1
             # Si tengo reward, es win y se termina el episodio
-        if r:
-            print >> sys.stderr, "llego en %d pasos"%steps
+        #if r:
+        #    print >> sys.stderr, "llego en %d pasos"%steps
     return Q
 
 def solve(Q, inicial):
