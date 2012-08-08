@@ -59,7 +59,7 @@ def main(game_id=None, solver=None, size=(4, 4)):
 def parseargs():
     """Parse command line arguments and run main"""
     parser = argparse.ArgumentParser(description='Solve "Cube".')
-    parser.add_argument('--solver', default="./astar.py",
+    parser.add_argument('--solver', default="./qlearning.py",
                         help='executable that solves the algorithm')
     parser.add_argument('--game', default=None, help='Game ID')
     parser.add_argument('--size', nargs=2, type=int, default=(4, 4),
