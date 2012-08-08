@@ -35,7 +35,7 @@ def simular_ambiente(state, a):
 def qlearning(inicial):
     Q = superdict(len(MOVS))
 
-    num_episodios = 10000
+    num_episodios = 5000
     alpha = 0.1
     gamma = 0.1
     max_steps = 50
@@ -58,8 +58,8 @@ def qlearning(inicial):
             s = s_next
             steps += 1
             # Si tengo reward, es win y se termina el episodio
-        #if r:
-        #    print >> sys.stderr, "llego en %d pasos"%steps
+        if r:
+            print >> sys.stderr, "%d"%steps
     return Q
 
 def solve(Q, inicial):
