@@ -17,7 +17,7 @@ class superdict(dict):
         return super(superdict, self).__getitem__(item)
 
 def choose_action(Q, state):
-    epsilon = 0.1
+    epsilon = 0.005
     posibles = state.can()
     if random.random() < epsilon:
         # Random
@@ -35,12 +35,12 @@ def simular_ambiente(state, a):
 def qlearning(inicial):
     Q = superdict(len(MOVS))
 
-    num_episodios = 5000
+    num_episodios = 500
     alpha = 0.1
     gamma = 0.1
     max_steps = 50
 
-    for e in range(num_episodios):
+    while num_episodios:
         s = inicial
         state = State(packed=s)
         steps = 0
@@ -59,7 +59,8 @@ def qlearning(inicial):
             steps += 1
             # Si tengo reward, es win y se termina el episodio
         if r:
-            print >> sys.stderr, "%d"%steps
+            num_episodios -= 1
+            print >> sys.stderr, "llego en %d pasos"%steps
     return Q
 
 def solve(Q, inicial):
