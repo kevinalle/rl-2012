@@ -38,7 +38,7 @@ def qlearning(inicial):
     num_episodios = 500
     alpha = 0.1
     gamma = 0.1
-    max_steps = 200
+    max_steps = 100
 
     while num_episodios:
         s = inicial
@@ -58,7 +58,9 @@ def qlearning(inicial):
             s = s_next
             steps += 1
             # Si tengo reward, es win y se termina el episodio
-        print >> sys.stderr, "%d"%steps
+        if r:
+            num_episodios -= 1
+            print >> sys.stderr, "llega en %d pasos"%steps
     return Q
 
 def solve(Q, inicial):
